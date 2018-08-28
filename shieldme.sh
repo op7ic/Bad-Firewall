@@ -45,6 +45,9 @@ array[""]=""
 array[""]=""
 array[""]=""
 
+echo [+] downloading IPs for current dyre_sslipblacklist attacks from http://www.malwaredomainlist.com/mdl.php?search=&colsearch=All&quantity=All
+curl "http://www.malwaredomainlist.com/mdl.php?search=&colsearch=All&quantity=All" | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | sort | uniq > malwarelist.txt
+
 echo [+] downloading IPs for current dyre_sslipblacklist attacks from https://sslbl.abuse.ch/blacklist/dyre_sslipblacklist_aggressive.csv
 curl https://sslbl.abuse.ch/blacklist/dyre_sslipblacklist_aggressive.csv | awk -F "," '{print $1}' | grep -v "\#" > agressive.txt
 
@@ -82,6 +85,9 @@ ipset create agressive hash:ip
 while read line; do ipset add agressive $line; done < agressive.txt
 iptables -I INPUT -m set --match-set agressive src -j DROP
 
+ipset create malwarelist hash:ip
+while read line; do ipset add malwarelist $line; done < malwarelist.txt
+iptables -I INPUT -m set --match-set malwarelist src -j DROP
 
 
 echo [+] removing block lists
@@ -90,6 +96,7 @@ rm -f tor_current_nodes_torlist.txt
 rm -f alienvault.txt
 rm -f ssh.txt
 rm -f agressive.txt
+rm -f malwarelist.txt
 
 
 echo [+] saving full output

@@ -43,6 +43,9 @@ The following known IP ranges are currently blocked:
 - [Darklist](http://www.darklist.de/raw.php)
 - [Dictionary SSH Attacks](http://charles.the-haleys.org/ssh_dico_attack_hdeny_format.php/hostsdeny.txt)
 - [Dyre Botnet IPs](https://sslbl.abuse.ch/blacklist/dyre_sslipblacklist_aggressive.csv)
+- [malwaredomainlist.com](http://www.malwaredomainlist.com/mdl.php?search=&colsearch=All&quantity=All)
+- [TOR IPs - dan.me.uk](https://www.dan.me.uk/torlist/)
+- [TOR IPs - torproject.org](https://check.torproject.org/exit-addresses)
 
 
 - [Feodo Tracker](https://feodotracker.abuse.ch/blocklist/?download=ipblocklist)
@@ -52,10 +55,7 @@ The following known IP ranges are currently blocked:
 - [High Confidence IPv4 Drop List](https://threatintel.stdominics.sa.edu.au/droplist_high_confidence.txt)
 - [IPSpamList](http://www.ipspamlist.com/public_feeds.csv)
 - [Malicious EXE IPs](http://www.urlvir.com/export-ip-addresses/)
-- [malwaredomainlist.com] (http://www.malwaredomainlist.com/mdl.php?search=&colsearch=All&quantity=All)
 - [Talos IP Blacklist](http://www.talosintelligence.com/documents/ip-blacklist)
-- [TOR IPs - dan.me.uk](https://www.dan.me.uk/torlist/)
-- [TOR IPs - torproject.org](https://check.torproject.org/exit-addresses)
 - [Dshield](https://dshield.org/ipsascii.html?limit=10000)
 - [VoipBL](http://www.voipbl.org/update/)
 
