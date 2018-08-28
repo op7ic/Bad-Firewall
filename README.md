@@ -1,20 +1,20 @@
 Bad-Firewall
 ===============
 
-Protecting your infrastructure with firewall shield stopping known Bad IPs. 
+Protecting your infrastructure with firewall shield stopping known bad IPs. 
 
 ## Prerequisites for Debian/Ubuntu based installations
 The script will execute the following to get necessary packages installed:
 ```
 apt-get -y update
-apt-get install -y ipset iptables curl fontconfig libfontconfig
+apt-get install -y ipset iptables curl
 ```
 
 ## Prerequisites for Red Hat/Centos based installations
 The script will execute the following to get necessary packages installed:
 ```
 yum -y update
-yum -y install ipset iptables curl fontconfig libfontconfig bzip2
+yum -y install ipset iptables curl 
 ```
 
 ## Installation
@@ -32,14 +32,13 @@ The following known IP ranges are currently blocked:
 - [Bad IPs](https://www.badips.com/get/list/any/2)
 - [BBcan177 DNSBL](https://gist.githubusercontent.com/BBcan177/bf29d47ea04391cb3eb0/raw/01757cd346cd6080ce12cbc79c172cd3b585ab04/MS-1)
 - [Blocklist.de Blocklist](https://lists.blocklist.de/lists/all.txt)
-- [Blocklist.de explort-all](https://www.blocklist.de/downloads/export-ips_all.txt)
+- [Blocklist.de export-all](https://www.blocklist.de/downloads/export-ips_all.txt)
 - [Botvrij.eu - ips](http://www.botvrij.eu/data/ioclist.ip-dst.raw)
 - [Brute Force Blocker](http://danger.rulez.sk/projects/bruteforceblocker/blist.php)
 - [C&C IPs](http://osint.bambenekconsulting.com/feeds/c2-ipmasterlist.txt)
 - [CI Bad Guys](http://cinsscore.com/list/ci-badguys.txt)
 - [CoinBlocker IPs](https://zerodot1.gitlab.io/CoinBlockerLists/MiningServerIPList.txt)
 - [Compromised IPs](https://rules.emergingthreats.net/blockrules/compromised-ips.txt)
-- [Cridex IPs](https://feodotracker.abuse.ch/blocklist/?download=ipblocklist)
 - [Darklist](http://www.darklist.de/raw.php)
 - [Dictionary SSH Attacks](http://charles.the-haleys.org/ssh_dico_attack_hdeny_format.php/hostsdeny.txt)
 - [Dyre Botnet IPs](https://sslbl.abuse.ch/blacklist/dyre_sslipblacklist_aggressive.csv)

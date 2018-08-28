@@ -12,7 +12,10 @@ elif VERB="$( which yum )" 2> /dev/null; then
    yum -y install ipset iptables curl bzip2
 fi
 
+echo [+] creating temp directory
 
+mkdir /tmp/fw-update
+cd /tmp/fw-update
 
 declare -A array
 array["badips"]="https://www.badips.com/get/list/any/2"
