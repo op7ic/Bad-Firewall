@@ -46,22 +46,20 @@ The following known IP ranges are currently blocked:
 - [malwaredomainlist.com](http://www.malwaredomainlist.com/mdl.php?search=&colsearch=All&quantity=All)
 - [TOR IPs - dan.me.uk](https://www.dan.me.uk/torlist/)
 - [TOR IPs - torproject.org](https://check.torproject.org/exit-addresses)
-
-
 - [Feodo Tracker](https://feodotracker.abuse.ch/blocklist/?download=ipblocklist)
 - [Ransomware IP Blocklist](https://ransomwaretracker.abuse.ch/downloads/RW_IPBL.txt)
 - [Zeus IP Blocklist](https://zeustracker.abuse.ch/blocklist.php?download=ipblocklist)
 - [GreenSnow Blacklist](http://blocklist.greensnow.co/greensnow.txt)
-- [High Confidence IPv4 Drop List](https://threatintel.stdominics.sa.edu.au/droplist_high_confidence.txt)
 - [IPSpamList](http://www.ipspamlist.com/public_feeds.csv)
 - [Malicious EXE IPs](http://www.urlvir.com/export-ip-addresses/)
 - [Talos IP Blacklist](http://www.talosintelligence.com/documents/ip-blacklist)
-- [Dshield](https://dshield.org/ipsascii.html?limit=10000)
 - [VoipBL](http://www.voipbl.org/update/)
+- [Dshield](https://iplists.firehol.org/files/dshield.netset)
+- [FireHol](https://iplists.firehol.org/files/firehol_level1.netset)
 
 ## CRON job
 
-In order to auto-update the blocks, copy the following code into /etc/cron.d/update-badfirewall. Don't update the list too often or some providers will ban your IP address. Once a week should be sufficient. 
+In order to auto-update the blocks, copy the following code into /etc/cron.d/update-badfirewall. Once a week should be sufficient but feel free to change this. 
 ```
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root
@@ -71,21 +69,45 @@ MAILTO=root
 ## Check for dropped packets
 Using iptables, you can check how many packets got dropped using the filters:
 ```
-iptables -L INPUT -v --line-numbers
+iptables -L INPUT -v --line-numbers # for IPv4
+ip6tables -L INPUT -v --line-numbers # for IPv6
 ```
 
 The table should look similar to this: 
 
 ```
-
+Chain INPUT (policy ACCEPT 1548 packets, 70960 bytes)
+num   pkts bytes target     prot opt in     out     source               destination
+1        2    80 DROP       all  --  any    any     anywhere             anywhere             match-set firehol src
+2        0     0 DROP       all  --  any    any     anywhere             anywhere             match-set feodo src
+3        6   516 DROP       all  --  any    any     anywhere             anywhere             match-set blocklist2 src
+4        8   488 DROP       all  --  any    any     anywhere             anywhere             match-set blocklist1 src
+5        0     0 DROP       all  --  any    any     anywhere             anywhere             match-set darklist src
+6        0     0 DROP       all  --  any    any     anywhere             anywhere             match-set coinblocker src
+7        4   572 DROP       all  --  any    any     anywhere             anywhere             match-set CI_BAD_GUYS src
+8        0     0 DROP       all  --  any    any     anywhere             anywhere             match-set compromised_ips src
+9        0     0 DROP       all  --  any    any     anywhere             anywhere             match-set VoipBL src
+10       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set Botvrij src
+11       9  1028 DROP       all  --  any    any     anywhere             anywhere             match-set badips src
+12      17  2255 DROP       all  --  any    any     anywhere             anywhere             match-set GreenSnow src
+13       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set Zeus src
+14       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set DNSBL src
+15       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set urlvir src
+16       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set Ransomware_IP src
+17       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set Bruteforceblocker src
+18       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set C2 src
+19       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set Talos src
+20       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set dshield src
+21       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set IPSpamList src
+22       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set malwarelist src
+23       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set agressive src
+24       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set ssh src
+25       5   204 DROP       all  --  any    any     anywhere             anywhere             match-set alienvault src
+26       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set tor-individual-ip2 src
+27       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set tor-individual-ip1 src
 ```
 
 ## Modify the blacklists you want to use
 
 Edit [shieldme.sh](shieldme.sh) and add/remove specific lists. You can see URLs which this script feeds from. Simply modify them or comment them out.
 If you for some reason want to ban all IP addresses from a certain country, have a look at [IPverse.net's](http://ipverse.net/ipblocks/data/countries/) aggregated IP lists which you can simply add to the list already implemented. 
-
-
-## Limitations
-
-- IPv6 ranges (WIP)
