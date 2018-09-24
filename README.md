@@ -1,7 +1,7 @@
 Bad-Firewall
 ===============
 
-Protecting infrastructure with firewall shield stopping known bad IPs. 
+This is a simple firewall shield stopping known bad IPs. 
 
 ## Prerequisites for Debian/Ubuntu based installations
 The script will execute the following to get necessary packages installed:
