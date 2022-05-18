@@ -30,6 +30,8 @@ array["VoipBL"]="http://www.voipbl.org/update/"
 array["firehol"]="https://iplists.firehol.org/files/firehol_level1.netset"
 array["emergingthreats_compromised"]="https://rules.emergingthreats.net/blockrules/compromised-ips.txt"
 array["threatview_high_confidence_list"]="https://threatview.io/Downloads/IP-High-Confidence-Feed.txt"
+array["emergingthreats-blocks"]="https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt"
+array["binarydefense"]="https://www.binarydefense.com/banlist.txt"
 
 echo ===== Downloading IP blocks =====
 
@@ -72,10 +74,19 @@ curl -s -A "Firefox" https://threatview.io/Downloads/Experimental-IOC-Tweets.txt
 echo [+] Downloading IPs for current threatview.io C2 List blocklist from https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt
 curl -s -A "Firefox" https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt | grep -o -e "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | grep -v "127\.0\.0\.1" | sort | uniq > threatview_c2feed_ips.txt 2> /dev/null
 
+echo [+] Downloading IPs for current cybercrime-tracker List blocklist from https://cybercrime-tracker.net/all.php
+curl -A "Firefox" https://cybercrime-tracker.net/all.php | grep -o -e "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | grep -v "127\.0\.0\.1" | sort | uniq > cybercrimetracker.txt 2> /dev/null
+
+
 echo [+] Extracting IPv6 addresses
 cat *.txt | grep -Po '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' > ipv6.txt
 
 echo ===== Setting up to IP blocks =====
+
+echo [+] Setting up blocks for cybercrimetracker from https://cybercrime-tracker.net/all.php
+ipset create cybercrimetracker hash:net hashsize 32768 maxelem 9999999 2>/dev/null || ipset flush cybercrimetracker 2> /dev/null
+while read line; do ipset -exist add cybercrimetracker $line; done < cybercrimetracker.txt 2>/dev/null
+iptables -C INPUT -m set --match-set cybercrimetracker src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set cybercrimetracker src -j DROP
 
 echo [+] Setting up blocks for threatview_c2feed from https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt
 ipset create threatview_c2feed hash:net hashsize 32768 maxelem 9999999 2>/dev/null || ipset flush threatview_c2feed 2> /dev/null
