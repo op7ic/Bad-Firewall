@@ -3,6 +3,7 @@
 # Tested on Debian/Centos
 # Author: Jerzy 'Yuri' Kramarz (op7ic) 
 
+echo ===== Updating box and downloading prerequisites =====
 # do installation based on which package manager is available.
 if VERB="$( which apt-get )" 2> /dev/null; then
    apt-get -y update 1> /dev/null 2> /dev/null
@@ -52,25 +53,25 @@ curl -s -A "Firefox" http://reputation.alienvault.com/reputation.data | awk -F "
 echo [+] Downloading IPs for current tor exit nodes blocklist from https://check.torproject.org/exit-addresses
 curl -s -A "Firefox" https://check.torproject.org/exit-addresses | grep ExitAddress | awk '{print $2}' | sort | uniq > tor_current_nodes.txt 2> /dev/null
 
-echo [+] Downloading IPs for tor exit node blocklist from https://www.dan.me.uk/torlist/
+echo [+] Downloading IPs for current tor exit nodes blocklist from https://www.dan.me.uk/torlist/
 curl -s -A "Firefox" https://www.dan.me.uk/torlist/ | sort | uniq > tor_current_nodes_torlist.txt 2> /dev/null
 
-echo [+] Downloading IPs for tor exit node blocklist from http://www.talosintelligence.com/documents/ip-blacklist
+echo [+] Downloading IPs for current Talos blocklist from http://www.talosintelligence.com/documents/ip-blacklist
 wget -q --user-agent "Firefox" http://www.talosintelligence.com/documents/ip-blacklist -O ip-blacklist.txt && cat ip-blacklist.txt | sort | uniq > Talos.txt 2> /dev/null
 
-echo [+] Downloading IPs for bruteforce hosts blocklist from https://jamesbrine.com.au/csv
+echo [+] Downloading IPs for current bruteforce hosts blocklist from https://jamesbrine.com.au/csv
 curl -s -A "Firefox" https://jamesbrine.com.au/csv | awk -F "," '{print $1}' | sort | uniq | grep -v ipv4 > bruteforce-ips.txt 2> /dev/null
 
-echo [+] Downloading IPs for abuse.ch urls and extra IPs blocklist from https://urlhaus.abuse.ch/downloads/text/
+echo [+] Downloading IPs for current abuse.ch URLs and extra IPs blocklist from https://urlhaus.abuse.ch/downloads/text/
 curl -s -A "Firefox" https://urlhaus.abuse.ch/downloads/text/ | grep -o -e "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | sort | uniq > urlhausabuse-ips.txt 2> /dev/null
 
-echo [+] Downloading IPs for abuse.ch blocklist from https://feodotracker.abuse.ch/downloads/ipblocklist.txt
+echo [+] Downloading IPs for current abuse.ch blocklist from https://feodotracker.abuse.ch/downloads/ipblocklist.txt
 curl -s -A "Firefox" https://feodotracker.abuse.ch/downloads/ipblocklist.txt | grep -o -e "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | sort | uniq > urlhausabuse-ips2.txt 2> /dev/null
 
-echo [+] Downloading IPs for threatview.io Twitter List blocklist from https://threatview.io/Downloads/Experimental-IOC-Tweets.txt
+echo [+] Downloading IPs for current threatview.io Twitter List blocklist from https://threatview.io/Downloads/Experimental-IOC-Tweets.txt
 curl -s -A "Firefox" https://threatview.io/Downloads/Experimental-IOC-Tweets.txt | grep -o -e "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | sort | uniq > threatview_twitterfeed_ips.txt 2> /dev/null
 
-echo [+] Downloading IPs for threatview.io C2 List blocklist from https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt
+echo [+] Downloading IPs for current threatview.io C2 List blocklist from https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt
 curl -s -A "Firefox" https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt | grep -o -e "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | grep -v "127\.0\.0\.1" | sort | uniq > threatview_c2feed_ips.txt 2> /dev/null
 
 echo [+] Extracting IPv6 addresses
@@ -79,84 +80,71 @@ cat *.txt | grep -Po '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4
 echo ===== Setting up to IP blocks =====
 
 echo [+] Setting up blocks for threatview_c2feed from https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt
-ipset create threatview_c2feed hash:net hashsize 32768 maxelem 9999999 2>/dev/null
-ipset flush threatview_c2feed 2> /dev/null
+ipset create threatview_c2feed hash:net hashsize 32768 maxelem 9999999 2>/dev/null || ipset flush threatview_c2feed 2> /dev/null
 while read line; do ipset -exist add threatview_c2feed $line; done < threatview_c2feed_ips.txt 2>/dev/null
-iptables -I INPUT -m set --match-set threatview_c2feed src -j DROP
+iptables -C INPUT -m set --match-set threatview_c2feed src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set threatview_c2feed src -j DROP
 
 echo [+] Setting up blocks for threatview_twitterfeed from https://threatview.io/Downloads/Experimental-IOC-Tweets.txt
-ipset create threatview_twitterfeed hash:net hashsize 32768 maxelem 9999999 2>/dev/null
-ipset flush threatview_twitterfeed 2> /dev/null
+ipset create threatview_twitterfeed hash:net hashsize 32768 maxelem 9999999 2>/dev/null || ipset flush threatview_twitterfeed 2> /dev/null
 while read line; do ipset -exist add threatview_twitterfeed $line; done < threatview_twitterfeed_ips.txt 2>/dev/null
-iptables -I INPUT -m set --match-set threatview_twitterfeed src -j DROP
+iptables -C INPUT -m set --match-set threatview_twitterfeed src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set threatview_twitterfeed src -j DROP 
 
 echo [+] Setting up blocks for abusechtracker1 from https://urlhaus.abuse.ch/downloads/text/
-ipset create abusechtracker1 hash:net hashsize 32768 maxelem 9999999 2>/dev/null
-ipset flush abusechtracker1 2> /dev/null
+ipset create abusechtracker1 hash:net hashsize 32768 maxelem 9999999 2>/dev/null || ipset flush abusechtracker1 2> /dev/null
 while read line; do ipset -exist add abusechtracker1 $line; done < urlhausabuse-ips.txt 2>/dev/null
-iptables -I INPUT -m set --match-set abusechtracker1 src -j DROP
+iptables -C INPUT -m set --match-set abusechtracker1 src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set abusechtracker1 src -j DROP
 
 echo [+] Setting up blocks for abusechtracker2 from https://feodotracker.abuse.ch/downloads/ipblocklist.txt
-ipset create abusechtracker2 hash:net hashsize 32768 maxelem 9999999 2>/dev/null
-ipset flush abusechtracker2 2> /dev/null
+ipset create abusechtracker2 hash:net hashsize 32768 maxelem 9999999 2>/dev/null || ipset flush abusechtracker2 2> /dev/null
 while read line; do ipset -exist add abusechtracker2 $line; done < urlhausabuse-ips2.txt 2>/dev/null
-iptables -I INPUT -m set --match-set abusechtracker2 src -j DROP
+iptables -C INPUT -m set --match-set abusechtracker2 src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set abusechtracker2 src -j DROP
 
 echo [+] Setting up blocks for tor-individual-ip1 from https://check.torproject.org/exit-addresses
-ipset create tor-individual-ip1 hash:net hashsize 32768 maxelem 9999999 2>/dev/null
-ipset flush tor-individual-ip1 2> /dev/null
+ipset create tor-individual-ip1 hash:net hashsize 32768 maxelem 9999999 2>/dev/null || ipset flush tor-individual-ip1 2> /dev/null
 while read line; do ipset -exist add tor-individual-ip1 $line; done < tor_current_nodes.txt 2>/dev/null
-iptables -I INPUT -m set --match-set tor-individual-ip1 src -j DROP
+iptables -C INPUT -m set --match-set tor-individual-ip1 src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set tor-individual-ip1 src -j DROP
 
 echo [+] Setting up blocks for tor-individual-ip2 from https://www.dan.me.uk/torlist/
-ipset create tor-individual-ip2 hash:net hashsize 32768 maxelem 9999999 2>/dev/null
-ipset flush tor-individual-ip2 2> /dev/null
+ipset create tor-individual-ip2 hash:net hashsize 32768 maxelem 9999999 2>/dev/null || ipset flush tor-individual-ip2 2> /dev/null
 while read line; do ipset -exist add tor-individual-ip2 $line; done < tor_current_nodes_torlist.txt 2>/dev/null
-iptables -I INPUT -m set --match-set tor-individual-ip2 src -j DROP
+iptables -C INPUT -m set --match-set tor-individual-ip2 src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set tor-individual-ip2 src -j DROP
 
 echo [+] Setting up blocks for alienvault from http://reputation.alienvault.com/reputation.data
-ipset create alienvault hash:net hashsize 32768 maxelem 9999999 2>/dev/null
-ipset flush alienvault 2> /dev/null
+ipset create alienvault hash:net hashsize 32768 maxelem 9999999 2>/dev/null || ipset flush alienvault 2> /dev/null
 while read line; do ipset -exist add alienvault $line; done < alienvault.txt 2>/dev/null
-iptables -I INPUT -m set --match-set alienvault src -j DROP
+iptables -C INPUT -m set --match-set alienvault src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set alienvault src -j DROP
 
 echo [+] Setting up blocks for ssh from http://charles.the-haleys.org/ssh_dico_attack_hdeny_format.php/hostsdeny.txt
-ipset create ssh hash:net hashsize 32768 maxelem 9999999 2> /dev/null
-ipset flush ssh 2> /dev/null
+ipset create ssh hash:net hashsize 32768 maxelem 9999999 2> /dev/null || ipset flush ssh 2> /dev/null
 while read line; do ipset -exist add ssh $line; done < ssh.txt 2>/dev/null
-iptables -I INPUT -m set --match-set ssh src -j DROP
+iptables -C INPUT -m set --match-set ssh src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set ssh src -j DROP
 
 echo [+] Setting up blocks for bruteforce-ips from https://jamesbrine.com.au/csv
-ipset create bruteforce-ips hash:net hashsize 32768 maxelem 9999999 2> /dev/null
-ipset flush bruteforce-ips 2> /dev/null
+ipset create bruteforce-ips hash:net hashsize 32768 maxelem 9999999 2> /dev/null || ipset flush bruteforce-ips 2> /dev/null
 while read line; do ipset -exist add bruteforce-ips $line; done < bruteforce-ips.txt 2>/dev/null
-iptables -I INPUT -m set --match-set bruteforce-ips src -j DROP
+iptables -C INPUT -m set --match-set bruteforce-ips src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set bruteforce-ips src -j DROP
 
 echo [+] Setting up blocks for dshield from https://iplists.firehol.org/files/dshield.netset
-ipset create dshield hash:net hashsize 32768 maxelem 9999999 2> /dev/null
-ipset flush dshield 2> /dev/null
+ipset create dshield hash:net hashsize 32768 maxelem 9999999 2> /dev/null || ipset flush dshield 2> /dev/null
 while read line; do ipset add dshield $line; done < dshield.txt 2>/dev/null
-iptables -I INPUT -m set --match-set dshield src -j DROP
+iptables -C INPUT -m set --match-set dshield src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set dshield src -j DROP
 
 echo [+] Setting up blocks for Talos from http://www.talosintelligence.com/documents/ip-blacklist
-ipset create Talos hash:net hashsize 32768 maxelem 9999999 2> /dev/null
-ipset flush Talos 2> /dev/null
+ipset create Talos hash:net hashsize 32768 maxelem 9999999 2> /dev/null || ipset flush Talos 2> /dev/null
 while read line; do ipset -exist add Talos $line; done < Talos.txt 2>/dev/null
-iptables -I INPUT -m set --match-set Talos src -j DROP
+iptables -C INPUT -m set --match-set Talos src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set Talos src -j DROP
 
 echo [+] Setting up blocks for IPv6 IPs in all block lists
-ipset -exist create ipv6 hash:net family inet6 hashsize 32768 maxelem 9999999 2> /dev/null
-ipset flush ipv6 2> /dev/null
+ipset -exist create ipv6 hash:net family inet6 hashsize 32768 maxelem 9999999 2> /dev/null | ipset flush ipv6 2> /dev/null
 while read line; do ipset -exist add ipv6 $line; done < ipv6.txt 2>/dev/null
-ip6tables -I INPUT -m set --match-set ipv6 src -j DROP
+iptables -C INPUT -m set --match-set ipv6 src -j DROP 2>/dev/null || ip6tables -I INPUT -m set --match-set ipv6 src -j DROP
 
 for z in "${!array[@]}"
   do
    echo [+] Setting up blocks for $z from "${array[$z]}"
-   ipset create $z hash:net hashsize 32768 maxelem 999999999 2> /dev/null
-   ipset flush $z 2> /dev/null
+   ipset create $z hash:net hashsize 32768 maxelem 999999999 2> /dev/null || ipset flush $z 2> /dev/null
    while read line; do ipset -exist add $z $line; done < $z.txt 2>/dev/null
-   iptables -I INPUT -m set --match-set $z src -j DROP 2>/dev/null
+   iptables -C INPUT -m set --match-set $z src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set $z src -j DROP 2>/dev/null
    rm -f $z.txt
 done
 
