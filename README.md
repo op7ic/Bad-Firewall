@@ -54,7 +54,7 @@ The following known IP ranges are currently blocked:
 In order to auto-update the blocks, copy the following code into /etc/cron.d/update-badfirewall or add cron entry for specific user to run the script.  
 
 ```
-0 0 * * 0      root /home/user/BadFirewall/shieldme.sh
+0 0 * * 0     /home/user/BadFirewall/shieldme.sh
 ```
 
 ## Check for dropped packets
@@ -100,10 +100,10 @@ num   pkts bytes target     prot opt in     out     source               destina
 
 If you would like to destory the set and all the associated rules, iptables needs to be cleared first, followed by deletion of ipset rules. 
 ```
-# Clean iptables list for IPv4 or delete individual rulesets using -D option
+# Clean iptables list for IPv4 or delete individual rulesets using -D option for specific rule (i.e. ssh)
 iptables --flush
 
-# Clean iptables list for Ipv6 or delete individual rulesets using -D option
+# Clean iptables list for Ipv6 or delete individual rulesets using -D option for specific rule (i.e. ssh)
 ip6tables --flush
 
 # Remove all sets from ipset
