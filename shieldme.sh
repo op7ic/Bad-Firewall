@@ -4,7 +4,6 @@
 # Author: Jerzy 'Yuri' Kramarz (op7ic) 
 
 echo ===== Updating box and downloading prerequisites =====
-# do installation based on which package manager is available.
 if VERB="$( which apt-get )" 2> /dev/null; then
    apt-get -y update 1> /dev/null 2> /dev/null
    apt-get install -y ipset iptables curl bzip2 wget 1> /dev/null 2> /dev/null
@@ -14,7 +13,6 @@ elif VERB="$( which yum )" 2> /dev/null; then
 fi
 
 echo [+] Creating Temp Directory
-
 mkdir /tmp/fw-update
 cd /tmp/fw-update
 
