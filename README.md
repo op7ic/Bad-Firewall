@@ -39,7 +39,6 @@ The following known IP ranges are currently blocked:
 - [TOR IPs - dan.me.uk](https://www.dan.me.uk/torlist/)
 - [TOR IPs - torproject.org](https://check.torproject.org/exit-addresses)
 - [Feodo Tracker](https://feodotracker.abuse.ch/downloads/ipblocklist.txt)
-- [Ransomware IP Blocklist](https://ransomwaretracker.abuse.ch/downloads/RW_IPBL.txt)
 - [GreenSnow Blacklist](http://blocklist.greensnow.co/greensnow.txt)
 - [Talos IP Blacklist](http://www.talosintelligence.com/documents/ip-blacklist)
 - [VoipBL](http://www.voipbl.org/update/)
