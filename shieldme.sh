@@ -30,7 +30,7 @@ array["VoipBL"]="http://www.voipbl.org/update/"
 array["firehol"]="https://iplists.firehol.org/files/firehol_level1.netset"
 array["emergingthreats_compromised"]="https://rules.emergingthreats.net/blockrules/compromised-ips.txt"
 array["threatview_high_confidence_list"]="https://threatview.io/Downloads/IP-High-Confidence-Feed.txt"
-array["emergingthreats-blocks"]="https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt"
+array["emergingthreats_blocks"]="https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt"
 array["binarydefense"]="https://www.binarydefense.com/banlist.txt"
 
 echo ===== Downloading IP blocks =====
