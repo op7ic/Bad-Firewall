@@ -4,7 +4,6 @@
 # Author: Jerzy 'Yuri' Kramarz (op7ic) 
 # Version: 1.1
 # Homepage: https://github.com/op7ic/Bad-Firewall
-
 echo ===== Updating box, downloading prerequisites and setting up base folder  =====
 if VERB="$( which apt-get )" 1> /dev/null 2> /dev/null; then
    apt-get -y update 1> /dev/null 2> /dev/null
@@ -44,7 +43,8 @@ array["feodotracker"]="https://feodotracker.abuse.ch/downloads/ipblocklist.txt"
 array["twitter-threatview"]="https://threatview.io/Downloads/Experimental-IOC-Tweets.txt"
 array["c2-threatview"]="https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt"
 array["cybercrime-tracker"]="https://cybercrime-tracker.net/all.php"
-
+array["sans-attack"]="https://isc.sans.edu/api/sources/attacks/"
+array["honeypot"]="https://www.projecthoneypot.org/list_of_ips.php?rss=1"
 echo ===== Downloading IP blocks =====
 for i in "${!array[@]}"
   do
