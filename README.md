@@ -47,7 +47,9 @@ The following known IP ranges are currently blocked:
 - [Threatview.IO C2 List](https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt)
 - [Bruteforce IPs](https://jamesbrine.com.au/csv)
 - [URL abuse.ch IPs](https://urlhaus.abuse.ch/downloads/text/)
-
+- [Cybercrime tracker](https://cybercrime-tracker.net/all.php)
+- [SANS attacks](https://isc.sans.edu/api/sources/attacks/)
+- [Honeypot](https://www.projecthoneypot.org/list_of_ips.php?rss=1)
 
 ## CRON job
 
