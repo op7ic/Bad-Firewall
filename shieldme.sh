@@ -57,7 +57,7 @@ echo ===== Setting up to IP blocks =====
 echo [+] Setting up blocks for IPv6 IPs in all block lists
 ipset -exist create ipv6 hash:net family inet6 hashsize 32768 maxelem 9999999 2> /dev/null | ipset flush ipv6 2> /dev/null
 while read line; do ipset -exist add ipv6 $line; done < ipv6.txt 2>/dev/null
-iptables -C INPUT -m set --match-set ipv6 src -j DROP 2>/dev/null || ip6tables -I INPUT -m set --match-set ipv6 src -j DROP
+ip6tables -C INPUT -m set --match-set ipv6 src -j DROP 2>/dev/null || ip6tables -I INPUT -m set --match-set ipv6 src -j DROP
 for z in "${!array[@]}"
   do
    echo [+] Setting up blocks for $z from "${array[$z]}"
