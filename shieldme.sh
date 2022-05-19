@@ -12,9 +12,11 @@ elif VERB="$( which yum )" 2> /dev/null; then
    yum -y install ipset iptables curl bzip2 wget 1> /dev/null 2> /dev/null
 fi
 
-echo [+] Creating Temp Directory
-mkdir /tmp/fw-update
-cd /tmp/fw-update
+TEMP_FOLDER_DATE=`date +%d"-"%m"-"%Y`
+OUTPUT_DIR="bad-firewall-${TEMP_FOLDER_DATE}"
+echo [+] Creating Temp Directory $OUTPUT_DIR
+mkdir $OUTPUT_DIR
+cd $OUTPUT_DIR
 
 declare -A array
 array["DNSBL"]="https://gist.githubusercontent.com/BBcan177/bf29d47ea04391cb3eb0/raw/01757cd346cd6080ce12cbc79c172cd3b585ab04/MS-1"
@@ -75,8 +77,7 @@ echo [+] Downloading IPs for current threatview.io C2 List blocklist from https:
 curl -s -A "Firefox" https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt | grep -o -e "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | grep -v "127\.0\.0\.1" | sort | uniq > threatview_c2feed_ips.txt 2> /dev/null
 
 echo [+] Downloading IPs for current cybercrime-tracker List blocklist from https://cybercrime-tracker.net/all.php
-curl -A "Firefox" https://cybercrime-tracker.net/all.php | grep -o -e "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | grep -v "127\.0\.0\.1" | sort | uniq > cybercrimetracker.txt 2> /dev/null
-
+curl -s -A "Firefox" https://cybercrime-tracker.net/all.php | grep -o -e "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | grep -v "127\.0\.0\.1" | sort | uniq > cybercrimetracker.txt 2> /dev/null
 
 echo [+] Extracting IPv6 addresses
 cat *.txt | grep -Po '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' > ipv6.txt
@@ -163,7 +164,7 @@ rm -f *.txt
 echo [+] Saving full firewall block list to /etc/ipset.conf
 ipset save > /etc/ipset.conf
 
-echo [+] Full list of blocked ranges is in /tmp/fw-update/blockedranges.txt
-ipset list > /tmp/fw-update/blockedranges.txt
+echo [+] Full list of blocked ranges is in $OUTPUT_DIR/blockedranges.txt
+ipset list > $OUTPUT_DIR/blockedranges.txt
 
-echo [!] Please remove /tmp/fw-update folder if no longer needed
+echo [!] Please remove $OUTPUT_DIR folder if no longer needed
