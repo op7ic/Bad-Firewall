@@ -3,7 +3,7 @@
 # Tested on Debian/Centos
 # Author: Jerzy 'Yuri' Kramarz (op7ic) 
 
-echo ===== Updating box and downloading prerequisites =====
+echo ===== Updating box, downloading prerequisites and setting up base folder  =====
 if VERB="$( which apt-get )" 2> /dev/null; then
    apt-get -y update 1> /dev/null 2> /dev/null
    apt-get install -y ipset iptables curl bzip2 wget 1> /dev/null 2> /dev/null
@@ -71,6 +71,8 @@ for z in "${!array[@]}"
    iptables -C INPUT -m set --match-set $z src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set $z src -j DROP 2>/dev/null
    rm -f $z.txt
 done
+
+echo ===== Cleanup and exit =====
 
 echo [+] Removing temp block lists stored locally
 rm -f *.txt
