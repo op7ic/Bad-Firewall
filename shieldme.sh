@@ -7,10 +7,10 @@
 echo ===== Updating box, downloading prerequisites and setting up base folder  =====
 if VERB="$( which apt-get )" 1> /dev/null 2> /dev/null; then
    apt-get -y update 1> /dev/null 2> /dev/null
-   apt-get install -y ipset iptables curl bzip2 wget 2> /dev/null
+   apt-get install -y ipset iptables curl bzip2 wget 1> /dev/null 2> /dev/null
 elif VERB="$( which yum )" 1> /dev/null 2> /dev/null; then
    yum -y update 1> /dev/null 2> /dev/null
-   yum -y install ipset iptables curl bzip2 wget 2> /dev/null
+   yum -y install ipset iptables curl bzip2 wget 1> /dev/null 2> /dev/null
 fi
 TEMP_FOLDER_DATE=`date +%d"-"%m"-"%Y`
 OUTPUT_DIR="bad-firewall-${TEMP_FOLDER_DATE}"
