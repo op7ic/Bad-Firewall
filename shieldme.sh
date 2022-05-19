@@ -48,11 +48,11 @@ array["honeypot"]="https://www.projecthoneypot.org/list_of_ips.php?rss=1"
 echo ===== Downloading IP blocks =====
 for i in "${!array[@]}"
   do
-  echo [+] Downloading IPs for current $i blocklist from "${array[$i]}"
-  curl -s -L -A "Firefox" ${array[$i]} | grep -o -E '([0-9]{1,3}\.){3}[0-9]{1,3}(/[0-9]{1,2})?' | grep -v "127\.0\.0\.1" | sort | uniq > $i.txt 2> /dev/null
+  echo [+] Downloading IPs for current $i blocklist from "${array[$i]}". Extracting both IPv4 and IPv6
+  outputvar=$(curl -s -L -A "Firefox" ${array[$i]})
+  echo $outputvar | grep -o -E '([0-9]{1,3}\.){3}[0-9]{1,3}(/[0-9]{1,2})?' | grep -v "127\.0\.0\.1" | sort | uniq > $i.txt 2> /dev/null
+  echo $outputvar | grep -o -P '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))'  | sort | uniq >> ipv6.txt 2> /dev/null
 done
-echo [+] Extracting IPv6 addresses
-cat *.txt | grep -Po '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' > ipv6.txt
 echo ===== Setting up to IP blocks =====
 echo [+] Setting up blocks for IPv6 IPs in all block lists
 ipset -exist create ipv6 hash:net family inet6 hashsize 32768 maxelem 9999999 2> /dev/null | ipset flush ipv6 2> /dev/null
