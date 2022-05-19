@@ -69,8 +69,8 @@ done
 echo ===== Cleanup and exit =====
 echo [+] Removing temp block lists stored locally
 rm -f *.txt
-echo [+] Saving full firewall block list to /etc/ipset.conf
-ipset save > /etc/ipset.conf
 echo [+] Full list of blocked ranges is in $OUTPUT_DIR/blockedranges.txt
 ipset list > $OUTPUT_DIR/blockedranges.txt
+echo [+] Saving full firewall block list to /etc/ipset.conf
+ipset save > /etc/ipset.conf
 echo [!] Please remove $OUTPUT_DIR folder if no longer needed
