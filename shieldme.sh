@@ -17,12 +17,21 @@ if [[ -n "$EXTERNAL_IP" ]]; then
 fi
 
 echo ===== Updating box, downloading prerequisites and setting up base folder  =====
-if VERB="$( which apt-get )" 1> /dev/null 2> /dev/null; then
-   apt-get -y update 1> /dev/null 2> /dev/null
-   apt-get install -y ipset iptables curl bzip2 wget 1> /dev/null 2> /dev/null
-elif VERB="$( which yum )" 1> /dev/null 2> /dev/null; then
-   yum -y update 1> /dev/null 2> /dev/null
-   yum -y install ipset iptables curl bzip2 wget 1> /dev/null 2> /dev/null
+if command -v apt-get >/dev/null 2>&1; then
+    echo "[+] Detected apt-get (Debian/Ubuntu)"
+    apt-get -y update >/dev/null 2>&1
+    apt-get install -y ipset iptables curl bzip2 wget >/dev/null 2>&1
+elif command -v yum >/dev/null 2>&1; then
+    echo "[+] Detected yum (CentOS/RHEL)"
+    yum -y update >/dev/null 2>&1
+    yum -y install ipset iptables curl bzip2 wget >/dev/null 2>&1
+elif command -v dnf >/dev/null 2>&1; then
+    echo "[+] Detected dnf (Fedora/newer RHEL)"
+    dnf -y update >/dev/null 2>&1
+    dnf -y install ipset iptables curl bzip2 wget >/dev/null 2>&1
+else
+    echo "[!] No supported package manager found"
+    exit 1
 fi
 TEMP_FOLDER_DATE=`date +%d"-"%m"-"%Y`
 OUTPUT_DIR="bad-firewall-${TEMP_FOLDER_DATE}"
