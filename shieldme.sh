@@ -52,6 +52,7 @@ array["firehol_darklist"]="https://raw.githubusercontent.com/firehol/blocklist-i
 array["tor_exit_nodes"]="https://check.torproject.org/exit-addresses"
 array["danme_tor"]="https://www.dan.me.uk/torlist/"
 array["threatview_ioc_twitter"]="https://threatview.io/Downloads/Experimental-IOC-Tweets.txt"
+array["firehol_vxvault"]="https://raw.githubusercontent.com/firehol/blocklist-ipsets/refs/heads/master/vxvault.ipset"
 
 echo ===== Downloading IP blocks =====
 for i in "${!array[@]}"
