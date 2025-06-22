@@ -1,118 +1,269 @@
-Bad-Firewall
-===============
+# Bad-Firewall
 
-This is a simple firewall shield stopping known bad IPs. 
+A robust firewall shield that automatically blocks known malicious IP addresses using ipset and iptables. 
 
-## Prerequisites for Debian/Ubuntu based installations
-The script will execute the following to get necessary packages installed:
-```
+## Features
+
+- **Automatic System IP Whitelisting**: Detects and whitelists all system IPs (including external IP) to prevent self-lockout
+- **Individual Blocklist Tracking**: Creates separate ipsets for each blocklist provider to identify which list is blocking specific IPs
+- **Smart Deduplication**: Removes duplicate IPs across blocklists while maintaining provider attribution
+- **IPv4 and IPv6 Support**: Full dual-stack support with separate ipsets
+- **Large-scale Protection**: Handles hundreds of thousands of malicious IPs efficiently
+- **Cross-distribution Support**: Works on Debian/Ubuntu and RHEL/CentOS systems
+
+## Prerequisites
+
+### Debian/Ubuntu based systems
+The script will automatically install required packages:
+```bash
 apt-get -y update
-apt-get install -y ipset iptables curl git wget
+apt-get install -y ipset iptables curl bzip2 wget
 ```
 
-## Prerequisites for Red Hat/Centos based installations
-The script will execute the following to get necessary packages installed:
-```
+### Red Hat/CentOS based systems
+The script will automatically install required packages:
+```bash
 yum -y update
-yum -y install ipset iptables curl git wget
+yum -y install ipset iptables curl bzip2 wget
 ```
 
 ## Installation
-```
+
+```bash
+# Clone the repository
 git clone https://github.com/op7ic/Bad-Firewall.git
-cd Bad-Firewall/ && chmod +x shieldme.sh
-./shieldme.sh
+cd Bad-Firewall/
+
+# Make the script executable
+chmod +x shieldme.sh
+
+# Run the script (requires root/sudo)
+sudo ./shieldme.sh
 ```
 
-## [shieldme.sh](shieldme.sh) filter rules
+## Current Blocklist Sources
 
-The following known IP ranges are currently blocked:
+The script blocks IPs from the following reputation sources (as of v1.6):
 
-- [Alienvault IP Reputation](http://reputation.alienvault.com/reputation.data)
-- [BBcan177 DNSBL](https://gist.githubusercontent.com/BBcan177/bf29d47ea04391cb3eb0/raw/01757cd346cd6080ce12cbc79c172cd3b585ab04/MS-1)
-- [Blocklist.de Blocklist](https://lists.blocklist.de/lists/all.txt)
-- [Blocklist.de export-all](https://www.blocklist.de/downloads/export-ips_all.txt)
-- [CI Bad Guys](http://cinsscore.com/list/ci-badguys.txt)
-- [Emerging Threats](https://rules.emergingthreats.net/blockrules/compromised-ips.txt)
-- [Darklist](http://www.darklist.de/raw.php)
-- [Dictionary SSH Attacks](http://charles.the-haleys.org/ssh_dico_attack_hdeny_format.php/hostsdeny.txt)
-- [TOR IPs - dan.me.uk](https://www.dan.me.uk/torlist/)
-- [TOR IPs - torproject.org](https://check.torproject.org/exit-addresses)
-- [Feodo Tracker](https://feodotracker.abuse.ch/downloads/ipblocklist.txt)
-- [GreenSnow Blacklist](http://blocklist.greensnow.co/greensnow.txt)
-- [Talos IP Blacklist](http://www.talosintelligence.com/documents/ip-blacklist)
-- [VoipBL](http://www.voipbl.org/update/)
-- [Dshield](https://iplists.firehol.org/files/dshield.netset)
-- [Threatview.IO Twitter Feed](https://threatview.io/Downloads/Experimental-IOC-Tweets.txt)
-- [Threatview.IO C2 List](https://threatview.io/Downloads/High-Confidence-CobaltStrike-C2%20-Feeds.txt)
-- [Bruteforce IPs](https://jamesbrine.com.au/csv)
-- [URL abuse.ch IPs](https://urlhaus.abuse.ch/downloads/text/)
-- [Cybercrime tracker](https://cybercrime-tracker.net/all.php)
-- [SANS attacks](https://isc.sans.edu/api/sources/attacks/)
-- [Honeypot](https://www.projecthoneypot.org/list_of_ips.php?rss=1)
+### [Blocklist.de](https://www.blocklist.de/) Lists
+- **[All Attacks](https://lists.blocklist.de/lists/all.txt)** - `blocklist_de_all`: Combined list of all attack types
+- **[SSH Attacks](https://lists.blocklist.de/lists/ssh.txt)** - `blocklist_de_ssh`: SSH brute force attempts
+- **[Mail Attacks](https://lists.blocklist.de/lists/mail.txt)** - `blocklist_de_mail`: Mail server attacks (SMTP, IMAP, POP3)
+- **[Apache Attacks](https://lists.blocklist.de/lists/apache.txt)** - `blocklist_de_apache`: Web server attacks
+- **[Bot Attacks](https://lists.blocklist.de/lists/bots.txt)** - `blocklist_de_bots`: Known bot networks
+- **[Bruteforce Logins](https://lists.blocklist.de/lists/bruteforcelogin.txt)** - `blocklist_de_bruteforce`: General bruteforce attempts
 
-## CRON job
+### [Emerging Threats](https://rules.emergingthreats.net/)
+- **[Compromised IPs](https://rules.emergingthreats.net/blockrules/compromised-ips.txt)** - `emergingthreats_compromised`: Known compromised hosts
+- **[Block IPs](https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt)** - `emergingthreats_blocks`: General malicious IPs
 
-In order to auto-update the blocks, copy the following code into /etc/cron.d/update-badfirewall or add cron entry for specific user to run the script.  
+### Threat Intelligence Feeds
+- **[Binary Defense](https://www.binarydefense.com/banlist.txt)** - `binarydefense`: Community threat intelligence
+- **[CI Army Bad Guys](http://cinsscore.com/list/ci-badguys.txt)** - `cinsscore`: Collective Intelligence Network Security
+- **[GreenSnow](http://blocklist.greensnow.co/greensnow.txt)** - `greensnow`: Blacklisted IPs from honeypot systems
+- **[Feodo Tracker](https://feodotracker.abuse.ch/downloads/ipblocklist.txt)** - `feodotracker`: Banking trojan C&C servers
 
-```
-0 0 * * 0     /home/user/BadFirewall/shieldme.sh
-```
+### [FireHOL IP Lists](https://github.com/firehol/blocklist-ipsets)
+- **[Level 1](https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level1.netset)** - `firehol_level1`: Most dangerous IPs (high confidence)
+- **[Level 2](https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level2.netset)** - `firehol_level2`: Dangerous IPs (medium confidence)
+- **[Level 3](https://github.com/firehol/blocklist-ipsets/blob/master/firehol_level3.netset)** - `firehol_level3`: Suspicious IPs (lower confidence)
+- **[BotScout](https://raw.githubusercontent.com/firehol/blocklist-ipsets/refs/heads/master/botscout_7d.ipset)** - `firehol_botscout`: Known bot IPs (7-day list)
+- **[Darklist](https://raw.githubusercontent.com/firehol/blocklist-ipsets/refs/heads/master/darklist_de.netset)** - `firehol_darklist`: German blocklist aggregation
+- **[VXVault](https://raw.githubusercontent.com/firehol/blocklist-ipsets/refs/heads/master/vxvault.ipset)** - `firehol_vxvault`: Malware distribution sites
 
-## Check for dropped packets
+### TOR Exit Nodes
+- **[Official TOR List](https://check.torproject.org/exit-addresses)** - `tor_exit_nodes`: TOR project's exit node list
+- **[Dan.me.uk TOR List](https://www.dan.me.uk/torlist/)** - `danme_tor`: Alternative TOR exit node list
 
-Using iptables, you can check how many packets got dropped using the filters:
-```
-iptables -L INPUT -v --line-numbers # for IPv4
-ip6tables -L INPUT -v --line-numbers # for IPv6
-```
+### Other Sources
+- **[ThreatView IOC Twitter](https://threatview.io/Downloads/Experimental-IOC-Tweets.txt)** - `threatview_ioc_twitter`: IPs from Twitter threat feeds
 
-The table should look similar to this: 
+## Automatic Updates
 
-```
-Chain INPUT (policy ACCEPT 2111 packets, 126K bytes)
-num   pkts bytes target     prot opt in     out     source               destination
-1        0     0 DROP       all  --  any    any     anywhere             anywhere             match-set feodo src
-2        0     0 DROP       all  --  any    any     anywhere             anywhere             match-set DNSBL src
-3       12   668 DROP       all  --  any    any     anywhere             anywhere             match-set GreenSnow src
-4       20  1200 DROP       all  --  any    any     anywhere             anywhere             match-set compromised_ips src
-5        1    40 DROP       all  --  any    any     anywhere             anywhere             match-set darklist src
-6       38  1631 DROP       all  --  any    any     anywhere             anywhere             match-set CI_BAD_GUYS src
-7        0     0 DROP       all  --  any    any     anywhere             anywhere             match-set blocklist3 src
-8        0     0 DROP       all  --  any    any     anywhere             anywhere             match-set blocklist2 src
-9        4   240 DROP       all  --  any    any     anywhere             anywhere             match-set blocklist1 src
-10       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set emergingthreats_compromised src
-11       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set threatview_high_confidence_list src
-12       1    40 DROP       all  --  any    any     anywhere             anywhere             match-set firehol src
-13       2    88 DROP       all  --  any    any     anywhere             anywhere             match-set VoipBL src
-14       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set Talos src
-15       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set dshield src
-16       1    40 DROP       all  --  any    any     anywhere             anywhere             match-set bruteforce-ips src
-17       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set ssh src
-18       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set alienvault src
-19       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set tor-individual-ip2 src
-20       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set tor-individual-ip1 src
-21       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set abusechtracker2 src
-22       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set abusechtracker1 src
-23       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set threatview_twitterfeed src
-24       0     0 DROP       all  --  any    any     anywhere             anywhere             match-set threatview_c2feed src
+### Option 1: Cron Job
+
+Add to root's crontab or create `/etc/cron.d/bad-firewall`:
+
+```bash
+# Update blocklists every Sunday at midnight
+0 0 * * 0 root /path/to/Bad-Firewall/shieldme.sh
+
+# Or update daily at 3 AM
+0 3 * * * root /path/to/Bad-Firewall/shieldme.sh
 ```
 
-## Deleting full chain
-
-If you would like to destory the set and all the associated rules, iptables needs to be cleared first, followed by deletion of ipset rules. 
+For user crontab (requires sudo privileges in script):
+```bash
+crontab -e
+# Add:
+0 0 * * 0 /home/user/Bad-Firewall/shieldme.sh
 ```
-# Clean iptables list for IPv4 or delete individual rulesets using -D option for specific rule (i.e. ssh)
-iptables --flush
 
-# Clean iptables list for Ipv6 or delete individual rulesets using -D option for specific rule (i.e. ssh)
-ip6tables --flush
+### Option 2: Systemd Service and Timer
 
-# Remove all sets from ipset
-ipset list | grep Name | awk -F ": " '{print $2}' | xargs -i ipset destroy {}
+Create service file `/etc/systemd/system/bad-firewall.service`:
+```ini
+[Unit]
+Description=Bad-Firewall IP Blocklist Update
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/path/to/Bad-Firewall/shieldme.sh
+StandardOutput=journal
+StandardError=journal
+# Restart on failure with 5 minute delay
+Restart=on-failure
+RestartSec=300
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Create timer file `/etc/systemd/system/bad-firewall.timer`:
+```ini
+[Unit]
+Description=Update Bad-Firewall blocklists weekly
+Requires=bad-firewall.service
+
+[Timer]
+OnCalendar=daily
+# Or use one of these alternatives:
+# OnCalendar=*-*-* 02:00:00     # Daily at 2 AM
+# OnCalendar=*-*-* 00,12:00:00  # Twice daily at midnight and noon
+# OnUnitActiveSec=24h           # 24 hours after last run
+# OnCalendar=weekly             # Once per week (Mondays at midnight)
+# Run 5 minutes after boot if missed
+OnBootSec=5min
+# Persist timing information
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+
+Enable and start the timer:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable bad-firewall.timer
+sudo systemctl start bad-firewall.timer
+
+# Check timer status
+sudo systemctl status bad-firewall.timer
+sudo systemctl list-timers --all
+```
+
+## Usage and Management
+
+### Check blocked packets
+```bash
+# IPv4 statistics
+sudo iptables -L INPUT -v -n --line-numbers
+
+# IPv6 statistics  
+sudo ip6tables -L INPUT -v -n --line-numbers
+```
+
+### Test if an IP is blocked
+```bash
+# Check which blocklist contains an IP
+sudo ipset test blocklist_de_ssh 192.168.1.100
+sudo ipset test firehol_level1 10.0.0.1
+```
+
+### List all IPs in a specific blocklist
+```bash
+sudo ipset list blocklist_de_ssh
+sudo ipset list firehol_level1
+```
+
+### Add custom IPs to whitelist
+```bash
+# IPv4
+sudo ipset add whitelist 192.168.1.100
+
+# IPv6
+sudo ipset add whitelist_v6 2001:db8::1
+```
+
+### View all ipsets
+```bash
+# List all ipset names
+sudo ipset list -n
+
+# Show summary with IP counts
+sudo ipset list -t
+```
+
+### Persistence across reboots
+The script saves configurations to `/etc/ipset.conf`. To ensure rules persist:
+
+For systemd-based systems:
+```bash
+sudo systemctl enable ipset
+```
+
+For older systems, add to `/etc/rc.local`:
+```bash
+ipset restore < /etc/ipset.conf
+```
+
+## Troubleshooting
+
+### Complete removal
+To completely remove all firewall rules and ipsets:
+```bash
+# Clear IPv4 iptables rules
+sudo iptables -F INPUT
+
+# Clear IPv6 iptables rules  
+sudo ip6tables -F INPUT
+
+# Destroy all ipsets
+sudo ipset list -n | xargs -I {} sudo ipset destroy {}
+```
+
+### Check logs
+```bash
+# View recent script runs (if using systemd)
+sudo journalctl -u bad-firewall.service
+
+# Check system logs
+sudo tail -f /var/log/syslog  # Debian/Ubuntu
+sudo tail -f /var/log/messages  # RHEL/CentOS
+```
+
+### Memory usage
+Monitor ipset memory consumption:
+```bash
+sudo ipset list -t | grep "Memory size:"
 ```
 
 ## Modify the blacklists you want to use
 
 Edit [shieldme.sh](shieldme.sh) and add/remove specific lists. You can see URLs which this script feeds from. Simply modify them or comment them out.
 If you for some reason want to ban all IP addresses from a certain country, have a look at [IPverse.net's](http://ipverse.net/ipblocks/data/countries/) aggregated IP lists which you can simply add to the list already implemented. 
+
+
+## Important Notes
+
+1. **First Run**: The initial run may take 5-10 minutes depending on your internet connection
+2. **Whitelisting**: Always ensure your management IPs are whitelisted before running
+3. **TOR Blocking**: Consider implications before blocking TOR exit nodes
+4. **False Positives**: Some legitimate services may be blocked - check logs if issues arise
+5. **Resource Usage**: Large blocklists can consume significant memory (typically 100-500MB)
+
+## Contributing
+
+Feel free to submit issues, feature requests, and pull requests on the [GitHub repository](https://github.com/op7ic/Bad-Firewall).
+
+## License
+
+See LICENSE file
+
+## Disclaimer
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
