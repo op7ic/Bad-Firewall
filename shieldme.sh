@@ -2,7 +2,6 @@
 # This script should be deployed on the box you want to protect from various attacks
 # Tested on Debian/Ubuntu/CentOS
 # Author: Jerzy 'Yuri' Kramarz (op7ic) 
-# Version: 1.6
 # Homepage: https://github.com/op7ic/Bad-Firewall
 echo ===== Detecting system IPs for automatic whitelisting =====
 # Get all system IPs (IPv4 and IPv6)
