@@ -198,11 +198,11 @@ echo ===== Cleanup and exit =====
 IPV4_COUNT=$(wc -l < seen_ipv4.txt 2>/dev/null || echo 0)
 IPV6_COUNT=$(wc -l < seen_ipv6.txt 2>/dev/null || echo 0)
 
-echo [+] Full list of blocked ranges is in $(pwd)/blockedranges.txt
+echo "[+] Full list of blocked ranges is in $(pwd)/blockedranges.txt"
 ipset list > blockedranges.txt
-echo [+] Saving full firewall block list to /etc/ipset.conf
+echo "[+] Saving full firewall block list to /etc/ipset.conf"
 ipset save > /etc/ipset.conf
-echo [!] Created ipsets summary:
+echo "[!] Created ipsets summary:"
 echo "    Whitelist ipsets: 2 (whitelist, whitelist_v6)"
 echo "    Blocklist ipsets: $ipset_count"
 echo "    Total unique IPv4 IPs: $IPV4_COUNT"
